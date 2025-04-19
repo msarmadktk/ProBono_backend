@@ -20,6 +20,11 @@ const workHistoryRoutes = require('./routes/workHistoryRoutes');
 
 const userIdRoute = require('./routes/getUserIdRoute');
 const categoryRoutes = require('./routes/categoryRoutes');
+
+//Newly added
+const skillsRoutes = require('./routes/skillsRoutes');
+
+
 // Initialize the app
 const app = express();
 
@@ -45,7 +50,7 @@ app.use('/api/work-history', workHistoryRoutes);
 
 app.use('/api/getUserId', userIdRoute);
 app.use('/api/categories', categoryRoutes);
-
+app.use('/api/skills', skillsRoutes);
 
 // Root route
 app.get('/', (req, res) => {

@@ -17,6 +17,9 @@ router.put('/:productId', digitalProductController.updateDigitalProduct);
 // Delete digital product
 router.delete('/:productId', digitalProductController.deleteDigitalProduct);
 
+
+
+// ******** HAVE TO TEST THIS ****** //
 // Submit product review
 router.post('/:productId/reviews', digitalProductController.submitProductReview);
 

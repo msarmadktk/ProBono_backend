@@ -19,4 +19,14 @@ router.post('/:userId/portfolio', profileController.addPortfolioItem);
 // Get portfolio items - no authentication required
 router.get('/:userId/portfolio', profileController.getPortfolioItems);
 
+//Newly added apis for Portfolio
+
+//delete a portfolio item
+router.delete('/:userId/portfolio/:portfolioItemId', profileController.deletePortfolioItem);
+
+//update a portfolio item
+router.put('/:userId/portfolio/:portfolioItemId', profileController.updatePortfolioItem);
+
+
+
 module.exports = router; 

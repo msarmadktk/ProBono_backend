@@ -72,10 +72,11 @@ exports.updateWorkHistoryEntry = async (req, res) => {
     }
     
     // If current position, set endDate to null
-    let finalEndDate = endDate;
-    if (isCurrent !== undefined && isCurrent) {
+    let finalEndDate = endDate ?? null;
+    if (isCurrent === true) {
       finalEndDate = null;
     }
+
     
     // Update the entry
     const result = await db.query(
@@ -96,7 +97,7 @@ exports.updateWorkHistoryEntry = async (req, res) => {
       entry: result.rows[0]
     });
   } catch (error) {
-    console.error('Error updating work history entry:', error);
+    console.error('Error updating work history entry:', error.message);
     res.status(500).json({ error: 'Server error while updating work history entry' });
   }
 };

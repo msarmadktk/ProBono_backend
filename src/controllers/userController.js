@@ -94,3 +94,4 @@ exports.banUser = async (req, res) => {
     res.status(500).json({ error: 'Server error while banning user' });
   }
 }; 
+
