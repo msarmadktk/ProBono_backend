@@ -500,7 +500,7 @@ pm.environment.set("userId", jsonData.user.id);
 ### Get Connects Balance
 
 - **Method**: GET
-- **URL**: `{{baseUrl}}/api/payments/connects`
+- **URL**: http://localhost:5000/api/payments/connects/?userId=1
 - **Expected Response** (200 OK):
 ```json
 {
@@ -518,34 +518,46 @@ pm.environment.set("userId", jsonData.user.id);
 - **Body**:
 ```json
 {
-  "amount": 10,
-  "payment_method": "credit_card"
+  "userId": 1,
+  "packageDetails": {
+    "amount": 10,
+    "price": 5.00
+  }
 }
 ```
 - **Expected Response** (200 OK):
 ```json
 {
-  "message": "Connects purchased successfully",
-  "connects": {
-    "id": 1,
-    "user_id": 1,
-    "balance": 60,
-    "last_updated": "2023-05-01T12:00:00.000Z"
-  },
-  "transaction": {
-    "id": 1,
-    "user_id": 1,
-    "transaction_type": "connect_purchase",
-    "amount": 10.00,
-    "transaction_date": "2023-05-01T12:00:00.000Z"
-  }
+    "message": "Connects purchased successfully",
+    "transaction": {
+        "id": 4,
+        "user_id": 1,
+        "job_id": null,
+        "transaction_type": "connect_purchase",
+        "amount": "5.00",
+        "transaction_date": "2025-04-22T11:15:32.214Z",
+        "details": "{\"amount\":10,\"price\":5}"
+    },
+    "connects": {
+        "id": 1,
+        "user_id": 1,
+        "balance": 20,
+        "last_updated": "2025-04-22T11:15:32.214Z"
+    },
+    "balance": {
+        "id": 2,
+        "user_id": 1,
+        "available_amount": "1995.00",
+        "pending_amount": "20.00",
+        "last_updated": "2025-04-22T11:15:32.214Z"
+    }
 }
 ```
 
 ### Get Transaction History
 
 - **Method**: GET
-- **URL**: `{{baseUrl}}/api/payments/transactions`
+- **URL**: http://localhost:5000/api/payments/transactions?userId=1
 - **Query Parameters**:
   - `transaction_type` (optional): Filter by transaction type
   - `startDate` (optional): Filter by start date
@@ -553,14 +565,15 @@ pm.environment.set("userId", jsonData.user.id);
 - **Expected Response** (200 OK):
 ```json
 [
-  {
-    "id": 1,
-    "user_id": 1,
-    "transaction_type": "connect_purchase",
-    "amount": 10.00,
-    "transaction_date": "2023-05-01T12:00:00.000Z",
-    "details": "Purchase of 10 connects"
-  }
+    {
+        "id": 4,
+        "user_id": 1,
+        "job_id": null,
+        "transaction_type": "connect_purchase",
+        "amount": "5.00",
+        "transaction_date": "2025-04-22T11:15:32.214Z",
+        "details": "{\"amount\":10,\"price\":5}"
+    }
 ]
 ```
 
