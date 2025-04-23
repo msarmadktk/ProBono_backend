@@ -25,6 +25,8 @@ const categoryRoutes = require('./routes/categoryRoutes');
 const skillsRoutes = require('./routes/skillsRoutes');
 
 
+
+
 // Initialize the app
 const app = express();
 

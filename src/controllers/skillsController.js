@@ -1,18 +1,18 @@
+// src/controllers/skillsController.js
 const db = require('../config/db');
 
 // Get all unique skills across all profiles
 exports.getAllSkills = async (req, res) => {
   try {
     const result = await db.query('SELECT skills FROM profiles WHERE skills IS NOT NULL');
-
-    // Combine and deduplicate skills
     const allSkills = new Set();
+
     result.rows.forEach(row => {
       try {
-        const skillList = JSON.parse(row.skills); // If it's stored as a JSON array
+        const skillList = JSON.parse(row.skills);
         skillList.forEach(skill => allSkills.add(skill.trim()));
       } catch {
-        const skillList = row.skills.split(','); // fallback for CSV
+        const skillList = row.skills.split(',');
         skillList.forEach(skill => allSkills.add(skill.trim()));
       }
     });
@@ -35,7 +35,6 @@ exports.getUserSkills = async (req, res) => {
     }
 
     const skills = result.rows[0].skills;
-
     let parsedSkills;
     try {
       parsedSkills = JSON.parse(skills);
@@ -50,7 +49,7 @@ exports.getUserSkills = async (req, res) => {
   }
 };
 
-// Update skills for a user
+// Update all skills for a user
 exports.updateUserSkills = async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -61,7 +60,6 @@ exports.updateUserSkills = async (req, res) => {
     }
 
     const skillString = JSON.stringify(skills);
-
     const result = await db.query(
       'UPDATE profiles SET skills = $1, updated_at = NOW() WHERE user_id = $2 RETURNING skills',
       [skillString, userId]
@@ -81,43 +79,92 @@ exports.updateUserSkills = async (req, res) => {
   }
 };
 
+// Add a single new skill
+exports.addUserSkill = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    let { skill } = req.body;
 
-exports.deleteUserSkill = async (req, res) => {
-    try {
-      const userId = req.params.userId;
-      const skillToRemove = req.params.skill.trim().toLowerCase();
+    console.log('Received userId:', userId);
+    console.log('Received skill:', skill);
 
-  
-      const profile = await db.query('SELECT skills FROM profiles WHERE user_id = $1', [userId]);
-  
-      if (profile.rows.length === 0) {
-        return res.status(404).json({ error: 'Profile not found' });
-      }
-  
-      let currentSkills;
-      try {
-        currentSkills = JSON.parse(profile.rows[0].skills);
-      } catch {
-        currentSkills = profile.rows[0].skills.split(',').map(s => s.trim());
-      }
-  
-      const updatedSkills = currentSkills.filter(
-        skill => skill.trim().toLowerCase() !== skillToRemove
-      );
-      
-  
-      const result = await db.query(
-        'UPDATE profiles SET skills = $1, updated_at = NOW() WHERE user_id = $2 RETURNING skills',
-        [JSON.stringify(updatedSkills), userId]
-      );
-  
-      res.json({
-        message: `Skill '${skillToRemove}' removed successfully`,
-        skills: JSON.parse(result.rows[0].skills)
-      });
-    } catch (error) {
-      console.error('Error removing skill:', error);
-      res.status(500).json({ error: 'Server error while removing skill' });
+    if (!skill || !userId) {
+      return res.status(400).json({ error: 'Skill and userId are required' });
     }
-  };
-  
+
+    skill = skill.trim();
+    const skillLower = skill.toLowerCase();
+
+    const result = await db.query('SELECT skills FROM profiles WHERE user_id = $1', [userId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+
+    let currentSkills = [];
+    const dbSkills = result.rows[0].skills;
+
+    if (dbSkills) {
+      try {
+        currentSkills = JSON.parse(dbSkills);
+      } catch {
+        currentSkills = dbSkills.split(',').map(s => s.trim());
+      }
+    }
+
+    // Check for redundancy
+    const existing = currentSkills.some(s => s.trim().toLowerCase() === skillLower);
+    if (existing) {
+      return res.status(200).json({ message: 'Skill already exists', skills: currentSkills });
+    }
+
+    const updatedSkills = [...currentSkills, skill];
+
+    await db.query(
+      'UPDATE profiles SET skills = $1, updated_at = NOW() WHERE user_id = $2',
+      [JSON.stringify(updatedSkills), userId]
+    );
+
+    res.status(200).json({ message: `Skill '${skill}' added successfully`, skills: updatedSkills });
+  } catch (error) {
+    console.error('Error adding skill:', error);
+    res.status(500).json({ error: 'Server error while adding skill' });
+  }
+};
+
+// Delete a specific skill from user profile
+exports.deleteUserSkill = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const skillToRemove = req.params.skill.trim().toLowerCase();
+
+    const profile = await db.query('SELECT skills FROM profiles WHERE user_id = $1', [userId]);
+    if (profile.rows.length === 0) {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+
+    let currentSkills;
+    try {
+      currentSkills = JSON.parse(profile.rows[0].skills);
+    } catch {
+      currentSkills = profile.rows[0].skills.split(',').map(s => s.trim());
+    }
+
+    const updatedSkills = currentSkills.filter(
+      skill => skill.trim().toLowerCase() !== skillToRemove
+    );
+
+    const result = await db.query(
+      'UPDATE profiles SET skills = $1, updated_at = NOW() WHERE user_id = $2 RETURNING skills',
+      [JSON.stringify(updatedSkills), userId]
+    );
+
+    res.json({
+      message: `Skill '${skillToRemove}' removed successfully`,
+      skills: JSON.parse(result.rows[0].skills)
+    });
+  } catch (error) {
+    console.error('Error removing skill:', error);
+    res.status(500).json({ error: 'Server error while removing skill' });
+  }
+};
