@@ -385,6 +385,7 @@ pm.environment.set("userId", jsonData.user.id);
 - **Body**:
 ```json
 {
+  "freelancerId": "1",
   "proposal_content": "I would be a great fit for this project...",
   "timeline": "2 weeks",
   "bid": 950.00
@@ -1054,7 +1055,7 @@ Headers:
   "email": "i221213@nu.edu.pk"
 }
 
-Response:
+Response:z
 {
     "userId": 17
 }
